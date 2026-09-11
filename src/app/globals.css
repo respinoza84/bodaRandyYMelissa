@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cream: #ecece3;
+  --color-olive: #6b6b4e;
+  --color-olive-deep: #55553c;
+  --color-sage: #9fb18f;
+  --color-ink: #3a3a2e;
+  --color-sand: #cbbba4;
+  --font-script: "Great Vibes", cursive;
+  --font-sans: "Roboto Condensed", Arial, sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+body { background: var(--color-cream); color: var(--color-ink); font-family: var(--font-sans); }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .fade { transition: none !important; }
+}
