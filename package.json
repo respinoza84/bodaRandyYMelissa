@@ -7,9 +7,9 @@
     "build": "next build",
     "start": "next start",
     "db:generate": "drizzle-kit generate",
-    "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio",
-    "db:seed": "tsx scripts/seed.ts",
+    "db:push": "DOTENV_CONFIG_PATH=.env.local drizzle-kit push",
+    "db:studio": "DOTENV_CONFIG_PATH=.env.local drizzle-kit studio",
+    "db:seed": "DOTENV_CONFIG_PATH=.env.local tsx scripts/seed.mts",
     "photos:fetch": "node scripts/fetch-photos.mjs",
     "photos:optimize": "node scripts/optimize-photos.mjs"
   },

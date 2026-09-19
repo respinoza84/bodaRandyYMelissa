@@ -4,8 +4,8 @@ import "dotenv/config";
 import { readFileSync } from "node:fs";
 import { parse } from "csv-parse/sync";
 import { randomBytes } from "node:crypto";
-import { db } from "../src/db";
-import { invitations, guests } from "../src/db/schema";
+import { db } from "../src/db/index.ts";
+import { invitations, guests } from "../src/db/schema.ts";
 import { eq } from "drizzle-orm";
 
 type Row = { grupo: string; contacto: string; email: string; telefono: string; invitado: string };
