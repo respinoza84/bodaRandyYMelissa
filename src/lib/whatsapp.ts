@@ -1,7 +1,9 @@
 import { wedding } from "@/config/wedding";
 
+export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || wedding.siteUrl).replace(/\/$/, "");
+
 export function invitationUrl(code: string) {
-  return `${process.env.NEXT_PUBLIC_SITE_URL}/invitacion/${code}`;
+  return `${siteUrl}/invitacion/${code}`;
 }
 
 // Enlace "click to chat": abre WhatsApp con el mensaje listo. Sin API ni aprobaciones.

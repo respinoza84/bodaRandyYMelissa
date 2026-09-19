@@ -1,5 +1,6 @@
 // Datos del evento. Todo lo que cambie de texto vive aquí, no en los componentes.
 export const wedding = {
+  siteUrl: "https://randyymelissa.bodas-costarica.com", // dominio oficial; NEXT_PUBLIC_SITE_URL lo puede sobrescribir
   couple: "Melissa y Randy",
   bride: "Melissa",
   groom: "Randy",

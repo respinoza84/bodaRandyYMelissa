@@ -3,6 +3,7 @@ import "./globals.css";
 import { wedding } from "@/config/wedding";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(wedding.siteUrl),
   title: `${wedding.couple} — Nuestra boda`,
   description: `${wedding.dateLabel} · ${wedding.venue}, ${wedding.city}`,
   openGraph: { images: ["/photos/01-beso-atardecer.jpg"] },
