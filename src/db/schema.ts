@@ -31,6 +31,13 @@ export const guests = pgTable("guests", {
   respondedAt: timestamp("responded_at", { withTimezone: true }),
 }, (t) => [index("guests_invitation_idx").on(t.invitationId)]);
 
+// Intentos fallidos de login al panel admin, por IP. Alimenta el límite de intentos.
+export const loginAttempts = pgTable("login_attempts", {
+  id: serial("id").primaryKey(),
+  ip: text("ip").notNull(),
+  attemptedAt: timestamp("attempted_at", { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [index("login_attempts_ip_idx").on(t.ip, t.attemptedAt)]);
+
 export const invitationsRelations = relations(invitations, ({ many }) => ({ guests: many(guests) }));
 export const guestsRelations = relations(guests, ({ one }) => ({
   invitation: one(invitations, { fields: [guests.invitationId], references: [invitations.id] }),

@@ -1,4 +1,6 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
+import { timingSafeEqual, createHash } from "node:crypto";
+import { clearFailures, isLockedOut, recordFailure } from "./rate-limit";
 
 const COOKIE = "boda_admin";
 
@@ -17,12 +19,35 @@ export async function isAdmin() {
   return !!c && c === (await adminToken());
 }
 
-export async function loginAdmin(password: string) {
-  if (password !== process.env.ADMIN_PASSWORD) return false;
+// Comparación en tiempo constante: se comparan hashes del mismo largo, así el tiempo no revela cuántos caracteres coinciden.
+function safeEqual(a: string, b: string) {
+  const h = (v: string) => createHash("sha256").update(v).digest();
+  return timingSafeEqual(h(a), h(b));
+}
+
+async function clientIp() {
+  const h = await headers();
+  return h.get("x-forwarded-for")?.split(",")[0].trim() || h.get("x-real-ip") || "unknown";
+}
+
+export type LoginResult = "ok" | "bad" | "locked";
+
+export async function loginAdmin(password: string): Promise<LoginResult> {
+  const expected = process.env.ADMIN_PASSWORD;
+  if (!expected || !process.env.ADMIN_SECRET) return "bad"; // mal configurado: nunca dejar entrar
+
+  const ip = await clientIp();
+  if (await isLockedOut(ip)) return "locked";
+
+  if (!safeEqual(password, expected)) {
+    await recordFailure(ip);
+    return "bad";
+  }
+  await clearFailures(ip);
   (await cookies()).set(COOKIE, await adminToken(), {
     httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 30,
   });
-  return true;
+  return "ok";
 }
 
 export async function logoutAdmin() { (await cookies()).delete(COOKIE); }
