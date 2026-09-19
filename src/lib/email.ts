@@ -3,12 +3,13 @@ import { wedding } from "@/config/wedding";
 import { invitationUrl } from "./whatsapp";
 
 const resend = () => new Resend(process.env.RESEND_API_KEY);
+const from = () => process.env.EMAIL_FROM || wedding.emailFrom;
 
 export async function sendInvitationEmail(to: string, contactName: string, code: string, guestCount: number) {
   const url = invitationUrl(code);
   const reserved = guestCount === 1 ? "1 espacio" : `${guestCount} espacios`;
   return resend().emails.send({
-    from: process.env.EMAIL_FROM!,
+    from: from(),
     to,
     subject: `${wedding.couple} — Estás invitado/a a nuestra boda`,
     html: `
@@ -27,7 +28,7 @@ export async function sendInvitationEmail(to: string, contactName: string, code:
 
 export async function sendConfirmationEmail(to: string, contactName: string, confirmed: string[], declined: string[]) {
   return resend().emails.send({
-    from: process.env.EMAIL_FROM!,
+    from: from(),
     to,
     subject: `Recibimos su confirmación — ${wedding.couple}`,
     html: `

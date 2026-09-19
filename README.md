@@ -13,7 +13,7 @@ Next.js 15 · Neon Postgres · Drizzle · Resend · Vercel. Todo el texto del ev
 ## Puesta en marcha (una vez)
 1. **Repo**: `git init && git add . && git commit -m "init"`, subir a GitHub, importar en Vercel.
 2. **Base de datos**: en el proyecto de Vercel → *Storage* → *Create Database* → **Neon** (plan Free). Vercel inyecta `DATABASE_URL` sola. Región: `us-east-1` (Washington) es la más cercana a Costa Rica.
-3. **Correo**: crear cuenta en resend.com → *Domains* → agregar `randyymelissa.com`. Resend da 3 registros DNS (SPF, DKIM, DMARC); agregarlos en Vercel → *Domains* → `randyymelissa.com` → *DNS Records*. Crear API key.
+3. **Correo**: crear cuenta en resend.com → *Domains* → agregar `bodas-costarica.com`. Resend da 3 registros DNS (SPF, DKIM, DMARC); agregarlos en Vercel → *Domains* → `bodas-costarica.com` → *DNS Records*. Remitente: `invitacion@bodas-costarica.com`. Crear API key.
 4. **Variables** en Vercel → *Settings* → *Environment Variables* (ver `.env.example`): `RESEND_API_KEY`, `EMAIL_FROM`, `NEXT_PUBLIC_SITE_URL`, `ADMIN_PASSWORD`, `ADMIN_SECRET`.
 5. **Local**: `vercel env pull .env.local` (o copiar a mano), luego `npm install`.
 6. **Tablas**: `npm run db:push`.
