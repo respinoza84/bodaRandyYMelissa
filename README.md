@@ -27,4 +27,3 @@ Next.js 15 · Neon Postgres · Drizzle · Resend · Vercel. Todo el texto del ev
 
 ## Al terminar (diciembre)
 `npm run db:seed` no borra nada; para cerrar, exportar CSV desde `/admin` y borrar el proyecto/DB en Vercel.
-# bodaRandyYMelissa
