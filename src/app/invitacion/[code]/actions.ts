@@ -5,6 +5,7 @@ import { guests, invitations } from "@/db/schema";
 import { eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { sendConfirmationEmail } from "@/lib/email";
+import { normalizePhone } from "@/lib/phone";
 
 export type RsvpState = { ok: boolean; message: string };
 
@@ -32,7 +33,7 @@ export async function submitRsvp(code: string, _prev: RsvpState, formData: FormD
   }
 
   const notes = String(formData.get("notes") ?? "").trim() || null;
-  const phone = String(formData.get("phone") ?? "").replace(/\D/g, "") || inv.phone;
+  const phone = normalizePhone(String(formData.get("phone") ?? "")) ?? inv.phone;
   await db.update(invitations).set({ respondedAt: now, notes, phone }).where(eq(invitations.id, inv.id));
 
   if (inv.email && process.env.RESEND_API_KEY) {

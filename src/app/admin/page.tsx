@@ -8,10 +8,36 @@ export const dynamic = "force-dynamic";
 
 function fmt(d: Date | null) { return d ? d.toLocaleDateString("es-CR", { day: "2-digit", month: "short" }) : "—"; }
 
-export default async function AdminPage() {
+// Minúsculas y sin tildes, para que "jose" encuentre "José".
+const norm = (v: string | null | undefined) => (v ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+const RESP_FILTERS = [
+  ["", "Todas las respuestas"], ["sin-responder", "Sin responder"], ["respondieron", "Ya respondieron"], ["incompleto", "Respuesta incompleta"],
+] as const;
+const SEND_FILTERS = [["", "Todos los envíos"], ["sin-enviar", "Sin enviar"], ["enviado", "Ya enviados"]] as const;
+
+type Search = { q?: string; resp?: string; envio?: string; ok?: string };
+
+export default async function AdminPage({ searchParams }: { searchParams: Promise<Search> }) {
   if (!(await isAdmin())) redirect("/admin/login");
+  const { q = "", resp = "", envio = "", ok } = await searchParams;
 
   const list = await db.query.invitations.findMany({ with: { guests: true }, orderBy: (t, { asc }) => asc(t.groupKey) });
+  const needle = norm(q.trim());
+  const shown = list.filter((inv) => {
+    const pending = inv.guests.filter((g) => g.status === "pending").length;
+    const sent = !!(inv.sentEmailAt || inv.sentWhatsappAt);
+    if (needle) {
+      const hay = norm([inv.groupKey, inv.contactName, inv.email, inv.phone, ...inv.guests.map((g) => g.name)].join(" "));
+      if (!hay.includes(needle)) return false;
+    }
+    if (resp === "sin-responder" && pending !== inv.guests.length) return false;
+    if (resp === "respondieron" && pending === inv.guests.length) return false;
+    if (resp === "incompleto" && !(pending > 0 && pending < inv.guests.length)) return false;
+    if (envio === "sin-enviar" && sent) return false;
+    if (envio === "enviado" && !sent) return false;
+    return true;
+  });
   const all = list.flatMap((i) => i.guests);
   const stats = {
     total: all.length,
@@ -26,6 +52,7 @@ export default async function AdminPage() {
       <header className="flex items-baseline justify-between">
         <h1 className="text-2xl">Invitados</h1>
         <div className="flex gap-4 text-sm">
+          <a href="/admin/grupo/nuevo" className="underline">+ Nuevo grupo</a>
           <a href="/admin/export" className="underline">Exportar CSV</a>
           <form action={logoutAction}><button className="underline">Salir</button></form>
         </div>
@@ -43,7 +70,24 @@ export default async function AdminPage() {
         ))}
       </dl>
 
-      <table className="mt-8 w-full text-sm">
+      {ok === "eliminado" && <p className="mt-4 text-sm text-green-700">Grupo eliminado.</p>}
+
+      <form method="GET" className="mt-8 flex flex-wrap items-center gap-2 text-sm">
+        <input name="q" defaultValue={q} placeholder="Buscar nombre, contacto, correo, teléfono o grupo" type="search"
+          className="min-w-64 flex-1 rounded border border-neutral-300 px-3 py-2" />
+        <select name="resp" defaultValue={resp} className="rounded border border-neutral-300 px-2 py-2">
+          {RESP_FILTERS.map(([v, label]) => <option key={v} value={v}>{label}</option>)}
+        </select>
+        <select name="envio" defaultValue={envio} className="rounded border border-neutral-300 px-2 py-2">
+          {SEND_FILTERS.map(([v, label]) => <option key={v} value={v}>{label}</option>)}
+        </select>
+        <button className="rounded bg-neutral-900 px-4 py-2 text-white">Filtrar</button>
+        {(q || resp || envio) && <a href="/admin" className="underline">Limpiar</a>}
+      </form>
+      <p className="mt-2 text-xs text-neutral-500">Mostrando {shown.length} de {list.length} grupos</p>
+
+      <div className="overflow-x-auto">
+      <table className="mt-4 w-full text-sm">
         <thead className="text-left text-neutral-600">
           <tr>
             <th className="py-2">Grupo</th><th>Invitados</th><th>Contacto</th><th>Teléfono</th>
@@ -51,11 +95,12 @@ export default async function AdminPage() {
           </tr>
         </thead>
         <tbody>
-          {list.map((inv) => (
+          {shown.map((inv) => (
             <tr key={inv.id} className="border-t border-neutral-200 align-top">
               <td className="py-3 pr-2">
                 <div>{inv.groupKey}</div>
                 <a href={invitationUrl(inv.code)} target="_blank" className="text-xs underline">enlace</a>
+                <a href={`/admin/grupo/${inv.id}`} className="ml-2 text-xs underline">editar</a>
               </td>
               <td className="py-3 pr-2">
                 {inv.guests.map((g) => (
@@ -97,6 +142,8 @@ export default async function AdminPage() {
           ))}
         </tbody>
       </table>
+      </div>
+      {shown.length === 0 && <p className="mt-6 text-sm text-neutral-500">Ningún grupo coincide con la búsqueda.</p>}
     </main>
   );
 }
