@@ -18,16 +18,21 @@ export default async function InvitationPage({ params }: { params: Promise<{ cod
     .where(and(eq(invitations.id, inv.id), isNull(invitations.viewedAt))).catch(() => {});
 
   const answered = inv.guests.some((g) => g.status !== "pending");
+  const count = inv.guests.length;
+  const plural = count > 1;
 
   return (
     <main>
       <Hero />
-      <Invitation>
+      <Invitation guestCount={count}>
         <p className="font-light">Hola {inv.contactName},</p>
-        <h2 className="mt-1 text-2xl">{answered ? "Su respuesta" : "Confirmen su asistencia"}</h2>
+        <h2 className="mt-1 text-2xl">
+          {answered ? (plural ? "Su respuesta" : "Tu respuesta") : (plural ? "Confirmen su asistencia" : "Confirma tu asistencia")}
+        </h2>
         <p className="mt-1 text-sm font-light text-cream/80">
-          {answered ? "Ya la recibimos. Pueden cambiarla aquí mismo si algo cambia."
-            : `Necesitamos su respuesta antes del ${wedding.rsvpDeadlineLabel}.`}
+          {answered
+            ? (plural ? "Ya la recibimos. Pueden cambiarla aquí mismo si algo cambia." : "Ya la recibimos. Puedes cambiarla aquí mismo si algo cambia.")
+            : `Necesitamos ${plural ? "su" : "tu"} respuesta antes del ${wedding.rsvpDeadlineLabel}.`}
         </p>
         <RsvpForm code={code} guestList={inv.guests} phone={inv.phone} />
       </Invitation>

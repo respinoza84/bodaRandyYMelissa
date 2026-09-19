@@ -4,8 +4,9 @@ import { invitationUrl } from "./whatsapp";
 
 const resend = () => new Resend(process.env.RESEND_API_KEY);
 
-export async function sendInvitationEmail(to: string, contactName: string, code: string) {
+export async function sendInvitationEmail(to: string, contactName: string, code: string, guestCount: number) {
   const url = invitationUrl(code);
+  const reserved = guestCount === 1 ? "1 espacio" : `${guestCount} espacios`;
   return resend().emails.send({
     from: process.env.EMAIL_FROM!,
     to,
@@ -15,7 +16,7 @@ export async function sendInvitationEmail(to: string, contactName: string, code:
         <p style="font-size:14px;margin:0 0 24px">Hola ${contactName},</p>
         <h1 style="font-weight:normal;font-size:28px;margin:0 0 8px">${wedding.couple}</h1>
         <p style="margin:0 0 24px">${wedding.dateLabel} · ${wedding.timeLabel}<br>${wedding.venue}</p>
-        <p>Nos haría muy felices contar con ustedes. Abran la invitación y confirmen su asistencia antes del <strong>${wedding.rsvpDeadlineLabel}</strong>.</p>
+        <p>Nos haría muy felices contar con ustedes. Hemos reservado <strong>${reserved}</strong> para su invitación. Abran la invitación y confirmen su asistencia antes del <strong>${wedding.rsvpDeadlineLabel}</strong>.</p>
         <p style="margin:32px 0">
           <a href="${url}" style="background:#2b2b2b;color:#fff;padding:14px 24px;text-decoration:none;border-radius:4px">Ver invitación y confirmar</a>
         </p>

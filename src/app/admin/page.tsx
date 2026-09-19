@@ -84,7 +84,7 @@ export default async function AdminPage() {
                 ) : "—"}
               </td>
               <td className="py-3 pr-2">
-                <a href={whatsappLink(inv.phone, inv.contactName, inv.code)} target="_blank" rel="noreferrer" className="rounded border border-neutral-300 px-2 py-1">
+                <a href={whatsappLink(inv.phone, inv.contactName, inv.code, inv.guests.length)} target="_blank" rel="noreferrer" className="rounded border border-neutral-300 px-2 py-1">
                   Abrir chat
                 </a>
                 <form action={markWhatsappSentAction.bind(null, inv.id)} className="mt-1">

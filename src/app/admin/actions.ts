@@ -12,9 +12,9 @@ async function guard() { if (!(await isAdmin())) throw new Error("No autorizado"
 
 export async function sendEmailAction(invitationId: number) {
   await guard();
-  const inv = await db.query.invitations.findFirst({ where: eq(invitations.id, invitationId) });
+  const inv = await db.query.invitations.findFirst({ where: eq(invitations.id, invitationId), with: { guests: true } });
   if (!inv?.email) return;
-  await sendInvitationEmail(inv.email, inv.contactName, inv.code);
+  await sendInvitationEmail(inv.email, inv.contactName, inv.code, inv.guests.length);
   await db.update(invitations).set({ sentEmailAt: new Date() }).where(eq(invitations.id, invitationId));
   revalidatePath("/admin");
 }

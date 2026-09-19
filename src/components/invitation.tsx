@@ -2,7 +2,7 @@ import Image from "next/image";
 import { wedding } from "@/config/wedding";
 
 // Invitación virtual: misma estructura y paleta que la impresa. `children` es el bloque de confirmación.
-export function Invitation({ children }: { children?: React.ReactNode }) {
+export function Invitation({ children, guestCount }: { children?: React.ReactNode; guestCount?: number }) {
   return (
     <section id="invitacion" className="relative mx-auto max-w-[640px] overflow-hidden">
       {/* eslint-disable @next/next/no-img-element */}
@@ -26,7 +26,16 @@ export function Invitation({ children }: { children?: React.ReactNode }) {
       </div>
 
       <p className="mt-10 text-center text-xl font-light">· Agradecemos su puntualidad ·</p>
+      {guestCount != null && (
+        <div className="mx-8 mt-8 border border-sand py-4 text-center">
+          <p className="font-light">Hemos reservado para usted:</p>
+          <p className="font-script text-4xl text-olive">
+            {guestCount} {guestCount === 1 ? "espacio" : "espacios"}
+          </p>
+        </div>
+      )}
       <p className="mt-3 text-center font-bold">Confirmar asistencia: antes del {wedding.rsvpDeadlineLabel}</p>
+      <p className="text-center font-light">Al teléfono {wedding.rsvpPhone}</p>
 
       {/* Banda olivo con foto que la cruza, como en la impresa */}
       <div className="relative mt-10">
@@ -60,6 +69,7 @@ export function Invitation({ children }: { children?: React.ReactNode }) {
         <dl className="mt-4 space-y-1 font-bold">
           <div><dt className="inline">Cuenta IBAN: </dt><dd className="inline select-all">{wedding.gift.iban}</dd></div>
           <div><dt className="inline">Cuenta BAC: </dt><dd className="inline select-all">{wedding.gift.bac}</dd></div>
+          <div><dt className="inline">Sinpe Móvil: </dt><dd className="inline select-all">{wedding.gift.sinpe}</dd></div>
           <div><dd>{wedding.gift.holder}</dd></div>
         </dl>
       </div>

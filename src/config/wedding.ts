@@ -9,7 +9,8 @@ export const wedding = {
   venue: "Sala de Eventos La Alborada",
   city: "San Isidro de Heredia",
   mapsUrl: "https://www.google.com/maps/search/?api=1&query=Sala+de+Eventos+La+Alborada+San+Isidro+de+Heredia",
-  rsvpDeadlineLabel: "30 de octubre",
+  rsvpDeadlineLabel: "8 de noviembre",
+  rsvpPhone: "8883 7958",
   verse: "Por encima de todo, vístanse de amor, que es el vínculo perfecto",
   verseRef: "Colosenses 3:14",
   quote: "Nuestro amor nació en Dios, crece en Cristo y permanecerá por su gracia.",
@@ -20,9 +21,10 @@ export const wedding = {
     intro: "El mejor regalo es compartir este día con ustedes. Sin embargo, si desean hacernos un obsequio, agradecemos que sea en efectivo (contaremos con sobres) o por transferencia electrónica.",
     iban: "CR26010200009304207656",
     bac: "930420765",
+    sinpe: "8883-7958",
     holder: "Melissa Chavarria Segura",
   },
-  contactPhone: "+506XXXXXXXX", // TODO: número desde el que se envían los WhatsApp
+  contactPhone: "+50688837958",
 };
 
 export const photos = [
