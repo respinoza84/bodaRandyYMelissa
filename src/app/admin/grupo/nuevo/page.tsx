@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { isAdmin } from "@/lib/auth";
 import { createGroupAction } from "../../actions";
+import { SubmitButton } from "../../submit-button";
+import { linkClass } from "../../button-styles";
 
 const ERRORS: Record<string, string> = {
   nombre: "Falta el nombre del contacto.",
@@ -15,10 +17,10 @@ export default async function NewGroupPage({ searchParams }: { searchParams: Pro
 
   return (
     <main className="mx-auto max-w-xl px-6 py-10">
-      <a href="/admin" className="text-sm underline">← Volver</a>
+      <a href="/admin" className={`${linkClass} text-sm`}>← Volver</a>
       <h1 className="mt-4 text-2xl">Nuevo grupo</h1>
       <p className="mt-1 text-sm text-neutral-600">Un grupo es una familia, pareja o persona sola: recibe un solo enlace.</p>
-      {error && <p className="mt-4 text-sm text-red-700">{ERRORS[error] ?? "Revisá los datos."}</p>}
+      {error && <p role="alert" className="mt-4 text-sm text-red-700">{ERRORS[error] ?? "Revisá los datos."}</p>}
 
       <form action={createGroupAction} className="mt-6 space-y-4">
         <label className="block text-sm">Contacto (a quien se le envía)
@@ -33,7 +35,7 @@ export default async function NewGroupPage({ searchParams }: { searchParams: Pro
         <label className="block text-sm">Invitados (uno por línea)
           <textarea name="guests" rows={5} required className={input} />
         </label>
-        <button className="rounded bg-neutral-900 px-4 py-2 text-white">Crear grupo</button>
+        <SubmitButton variant="primary" size="md" pendingLabel="Creando…">Crear grupo</SubmitButton>
       </form>
     </main>
   );

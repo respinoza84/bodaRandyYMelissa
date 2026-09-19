@@ -5,6 +5,7 @@ import { guests, invitations } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { randomBytes } from "node:crypto";
 import { normalizePhone } from "@/lib/phone";
+import type { ActionResult } from "./toast";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { isAdmin, logoutAdmin } from "@/lib/auth";
@@ -12,26 +13,42 @@ import { sendInvitationEmail } from "@/lib/email";
 
 async function guard() { if (!(await isAdmin())) throw new Error("No autorizado"); }
 
-export async function sendEmailAction(invitationId: number) {
+export async function sendEmailAction(invitationId: number): Promise<ActionResult> {
   await guard();
   const inv = await db.query.invitations.findFirst({ where: eq(invitations.id, invitationId), with: { guests: true } });
-  if (!inv?.email) return;
-  await sendInvitationEmail(inv.email, inv.contactName, inv.code, inv.guests.length);
+  if (!inv) return { ok: false, message: "El grupo ya no existe." };
+  if (!inv.email) return { ok: false, message: "Este grupo no tiene correo." };
+  // Protección contra doble clic o varias pestañas: si se envió hace segundos, no se repite.
+  if (inv.sentEmailAt && Date.now() - inv.sentEmailAt.getTime() < 15_000) {
+    return { ok: true, message: `Ya se envió a ${inv.email} hace un momento.` };
+  }
+  if (!process.env.RESEND_API_KEY) return { ok: false, message: "Falta configurar RESEND_API_KEY en Vercel." };
+
+  try {
+    const res = await sendInvitationEmail(inv.email, inv.contactName, inv.code, inv.guests.length);
+    if (res.error) return { ok: false, message: `No se pudo enviar a ${inv.email}: ${res.error.message}` };
+  } catch (e) {
+    console.error(e);
+    return { ok: false, message: `No se pudo enviar a ${inv.email}. Intentá de nuevo.` };
+  }
   await db.update(invitations).set({ sentEmailAt: new Date() }).where(eq(invitations.id, invitationId));
   revalidatePath("/admin");
+  return { ok: true, message: `Correo ${inv.sentEmailAt ? "reenviado" : "enviado"} a ${inv.email}.` };
 }
 
-export async function markWhatsappSentAction(invitationId: number) {
+export async function markWhatsappSentAction(invitationId: number): Promise<ActionResult> {
   await guard();
   await db.update(invitations).set({ sentWhatsappAt: new Date() }).where(eq(invitations.id, invitationId));
   revalidatePath("/admin");
+  return { ok: true, message: "Marcado como enviado por WhatsApp." };
 }
 
-export async function updatePhoneAction(invitationId: number, formData: FormData) {
+export async function updatePhoneAction(invitationId: number, formData: FormData): Promise<ActionResult> {
   await guard();
   const phone = normalizePhone(String(formData.get("phone") ?? ""));
   await db.update(invitations).set({ phone }).where(eq(invitations.id, invitationId));
   revalidatePath("/admin");
+  return { ok: true, message: phone ? `Teléfono guardado: ${phone}.` : "Teléfono borrado." };
 }
 
 export async function logoutAction() {

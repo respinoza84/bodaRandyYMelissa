@@ -5,7 +5,9 @@ import { invitations } from "@/db/schema";
 import { isAdmin } from "@/lib/auth";
 import { invitationUrl, whatsappLink } from "@/lib/whatsapp";
 import { deleteGroupAction, updateGroupAction } from "../../actions";
-import { ConfirmButton } from "../../confirm-button";
+import { FlashToast } from "../../toast";
+import { SubmitButton } from "../../submit-button";
+import { buttonClass, linkClass } from "../../button-styles";
 
 export const dynamic = "force-dynamic";
 
@@ -35,13 +37,13 @@ export default async function GroupPage({
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-10">
-      <a href="/admin" className="text-sm underline">← Volver</a>
+      <a href="/admin" className={`${linkClass} text-sm`}>← Volver</a>
       <h1 className="mt-4 text-2xl">{inv.groupKey} · {inv.contactName}</h1>
-      {ok && <p className="mt-3 text-sm text-green-700">{OK[ok] ?? "Listo."}</p>}
-      {error && <p className="mt-3 text-sm text-red-700">{ERRORS[error] ?? "Revisá los datos."}</p>}
+      <FlashToast message={ok ? (OK[ok] ?? "Listo.") : undefined} />
+      {error && <p role="alert" className="mt-3 text-sm text-red-700">{ERRORS[error] ?? "Revisá los datos."}</p>}
 
       <section className="mt-6 rounded border border-neutral-300 p-4 text-sm">
-        <p>Enlace: <a href={url} target="_blank" rel="noreferrer" className="break-all underline select-all">{url}</a></p>
+        <p>Enlace: <a href={url} target="_blank" rel="noreferrer" className={`${linkClass} break-all select-all`}>{url}</a></p>
         <dl className="mt-3 grid grid-cols-2 gap-x-6 gap-y-1 sm:grid-cols-4">
           <div><dt className="text-neutral-500">Correo enviado</dt><dd>{when(inv.sentEmailAt)}</dd></div>
           <div><dt className="text-neutral-500">WhatsApp enviado</dt><dd>{when(inv.sentWhatsappAt)}</dd></div>
@@ -49,7 +51,7 @@ export default async function GroupPage({
           <div><dt className="text-neutral-500">Respondió</dt><dd>{when(inv.respondedAt)}</dd></div>
         </dl>
         <a href={whatsappLink(inv.phone, inv.contactName, inv.code, guestList.length)} target="_blank" rel="noreferrer"
-          className="mt-3 inline-block rounded border border-neutral-300 px-2 py-1">Abrir chat de WhatsApp</a>
+          className={buttonClass("secondary", "sm", "mt-3")}>Abrir chat de WhatsApp</a>
         {inv.notes && (
           <blockquote className="mt-4 border-l-2 border-neutral-300 pl-3 italic">
             <span className="not-italic text-neutral-500">Mensaje de los invitados:</span><br />“{inv.notes}”
@@ -99,14 +101,14 @@ export default async function GroupPage({
         <label className="block text-sm">Agregar invitados (uno por línea)
           <textarea name="newGuests" rows={2} className={input} />
         </label>
-        <button className="rounded bg-neutral-900 px-4 py-2 text-white">Guardar cambios</button>
+        <SubmitButton variant="primary" size="md" pendingLabel="Guardando…">Guardar cambios</SubmitButton>
       </form>
 
       <form action={deleteGroupAction.bind(null, inv.id)} className="mt-12 border-t border-neutral-200 pt-6">
-        <ConfirmButton message={`¿Eliminar el grupo ${inv.groupKey} (${inv.contactName}) y sus ${guestList.length} invitado(s)? No se puede deshacer.`}
-          className="rounded border border-red-300 px-3 py-1 text-sm text-red-700">
+        <SubmitButton variant="danger" pendingLabel="Eliminando…"
+          confirm={`¿Eliminar el grupo ${inv.groupKey} (${inv.contactName}) y sus ${guestList.length} invitado(s)? No se puede deshacer.`}>
           Eliminar grupo
-        </ConfirmButton>
+        </SubmitButton>
       </form>
     </main>
   );

@@ -3,6 +3,9 @@ import { db } from "@/db";
 import { isAdmin } from "@/lib/auth";
 import { whatsappLink, invitationUrl } from "@/lib/whatsapp";
 import { logoutAction, markWhatsappSentAction, sendEmailAction, updatePhoneAction } from "./actions";
+import { ActionForm, FlashToast } from "./toast";
+import { SubmitButton } from "./submit-button";
+import { buttonClass, linkClass } from "./button-styles";
 
 export const dynamic = "force-dynamic";
 
@@ -51,10 +54,10 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
     <main className="mx-auto max-w-6xl px-6 py-10">
       <header className="flex items-baseline justify-between">
         <h1 className="text-2xl">Invitados</h1>
-        <div className="flex gap-4 text-sm">
-          <a href="/admin/grupo/nuevo" className="underline">+ Nuevo grupo</a>
-          <a href="/admin/export" className="underline">Exportar CSV</a>
-          <form action={logoutAction}><button className="underline">Salir</button></form>
+        <div className="flex items-center gap-2">
+          <a href="/admin/grupo/nuevo" className={buttonClass("primary")}>+ Nuevo grupo</a>
+          <a href="/admin/export" className={buttonClass("secondary")}>Exportar CSV</a>
+          <form action={logoutAction}><SubmitButton pendingLabel="Saliendo…">Salir</SubmitButton></form>
         </div>
       </header>
 
@@ -70,7 +73,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         ))}
       </dl>
 
-      {ok === "eliminado" && <p className="mt-4 text-sm text-green-700">Grupo eliminado.</p>}
+      <FlashToast message={ok === "eliminado" ? "Grupo eliminado." : undefined} />
 
       <form method="GET" className="mt-8 flex flex-wrap items-center gap-2 text-sm">
         <input name="q" defaultValue={q} placeholder="Buscar nombre, contacto, correo, teléfono o grupo" type="search"
@@ -81,8 +84,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         <select name="envio" defaultValue={envio} className="rounded border border-neutral-300 px-2 py-2">
           {SEND_FILTERS.map(([v, label]) => <option key={v} value={v}>{label}</option>)}
         </select>
-        <button className="rounded bg-neutral-900 px-4 py-2 text-white">Filtrar</button>
-        {(q || resp || envio) && <a href="/admin" className="underline">Limpiar</a>}
+        <button className={buttonClass("primary", "md")}>Filtrar</button>
+        {(q || resp || envio) && <a href="/admin" className={linkClass}>Limpiar</a>}
       </form>
       <p className="mt-2 text-xs text-neutral-500">Mostrando {shown.length} de {list.length} grupos</p>
 
@@ -99,8 +102,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
             <tr key={inv.id} className="border-t border-neutral-200 align-top">
               <td className="py-3 pr-2">
                 <div>{inv.groupKey}</div>
-                <a href={invitationUrl(inv.code)} target="_blank" className="text-xs underline">enlace</a>
-                <a href={`/admin/grupo/${inv.id}`} className="ml-2 text-xs underline">editar</a>
+                <a href={invitationUrl(inv.code)} target="_blank" className={`${linkClass} text-xs`}>enlace</a>
+                <a href={`/admin/grupo/${inv.id}`} className={`${linkClass} ml-2 text-xs`}>editar</a>
               </td>
               <td className="py-3 pr-2">
                 {inv.guests.map((g) => (
@@ -115,26 +118,36 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
               </td>
               <td className="py-3 pr-2">{inv.contactName}<div className="text-xs text-neutral-500">{inv.email ?? "sin correo"}</div></td>
               <td className="py-3 pr-2">
-                <form action={updatePhoneAction.bind(null, inv.id)} className="flex gap-1">
-                  <input name="phone" defaultValue={inv.phone ?? ""} placeholder="50688881234" className="w-32 rounded border border-neutral-300 px-2 py-1" />
-                  <button className="rounded border border-neutral-300 px-2">Guardar</button>
-                </form>
+                <ActionForm action={updatePhoneAction.bind(null, inv.id)} className="flex gap-1">
+                  <input name="phone" defaultValue={inv.phone ?? ""} placeholder="50688881234"
+                    className="w-32 rounded border border-neutral-300 px-2 py-1 transition-colors hover:border-neutral-400 focus:border-neutral-900 focus:outline-none" />
+                  <SubmitButton pendingLabel="Guardando…">Guardar</SubmitButton>
+                </ActionForm>
               </td>
               <td className="py-3 pr-2">
                 {inv.email ? (
-                  <form action={sendEmailAction.bind(null, inv.id)}>
-                    <button className="rounded border border-neutral-300 px-2 py-1">{inv.sentEmailAt ? "Reenviar" : "Enviar"}</button>
-                    <div className="text-xs text-neutral-500">{fmt(inv.sentEmailAt)}</div>
-                  </form>
+                  <ActionForm action={sendEmailAction.bind(null, inv.id)}>
+                    <SubmitButton pendingLabel="Enviando…" variant={inv.sentEmailAt ? "secondary" : "primary"}>
+                      {inv.sentEmailAt ? "Reenviar" : "Enviar"}
+                    </SubmitButton>
+                    {inv.sentEmailAt
+                      ? <div className="mt-1 text-xs text-green-700">✓ enviado {fmt(inv.sentEmailAt)}</div>
+                      : <div className="mt-1 text-xs text-neutral-500">sin enviar</div>}
+                  </ActionForm>
                 ) : "—"}
               </td>
               <td className="py-3 pr-2">
-                <a href={whatsappLink(inv.phone, inv.contactName, inv.code, inv.guests.length)} target="_blank" rel="noreferrer" className="rounded border border-neutral-300 px-2 py-1">
+                <a href={whatsappLink(inv.phone, inv.contactName, inv.code, inv.guests.length)} target="_blank" rel="noreferrer" className={buttonClass("secondary")}>
                   Abrir chat
                 </a>
-                <form action={markWhatsappSentAction.bind(null, inv.id)} className="mt-1">
-                  <button className="text-xs underline">{inv.sentWhatsappAt ? `enviado ${fmt(inv.sentWhatsappAt)}` : "marcar enviado"}</button>
-                </form>
+                <ActionForm action={markWhatsappSentAction.bind(null, inv.id)} className="mt-1">
+                  {inv.sentWhatsappAt
+                    ? <div className="text-xs text-green-700">✓ enviado {fmt(inv.sentWhatsappAt)}</div>
+                    : null}
+                  <SubmitButton asLink pendingLabel="Guardando…" className="text-xs">
+                    {inv.sentWhatsappAt ? "marcar de nuevo" : "marcar enviado"}
+                  </SubmitButton>
+                </ActionForm>
               </td>
               <td className="py-3 pr-2">{fmt(inv.viewedAt)}</td>
               <td className="py-3">{fmt(inv.respondedAt)}</td>
