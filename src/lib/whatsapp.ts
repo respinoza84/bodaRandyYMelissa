@@ -1,6 +1,15 @@
 import { wedding } from "@/config/wedding";
 
-export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || wedding.siteUrl).replace(/\/$/, "");
+// Solo se usa el origen (https://dominio). Si NEXT_PUBLIC_SITE_URL trae una ruta por error (p. ej. /admin/login)
+// o no trae https://, se corrige; si es inválida, se usa el dominio oficial de wedding.ts.
+function resolveSiteUrl() {
+  const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (raw) {
+    try { return new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`).origin; } catch { /* inválida */ }
+  }
+  return wedding.siteUrl;
+}
+export const siteUrl = resolveSiteUrl();
 
 export function invitationUrl(code: string) {
   return `${siteUrl}/invitacion/${code}`;
