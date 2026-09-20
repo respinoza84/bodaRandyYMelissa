@@ -6,10 +6,11 @@ import { logoutAction, markWhatsappSentAction, sendEmailAction, updatePhoneActio
 import { ActionForm, FlashToast } from "./toast";
 import { SubmitButton } from "./submit-button";
 import { buttonClass, linkClass } from "./button-styles";
+import { StatsDetail, isDetailKey, type DetailKey } from "./stats-detail";
 
 export const dynamic = "force-dynamic";
 
-function fmt(d: Date | null) { return d ? d.toLocaleDateString("es-CR", { day: "2-digit", month: "short" }) : "—"; }
+function fmt(d: Date | null) { return d ? d.toLocaleDateString("es-CR", { timeZone: "America/Costa_Rica", day: "2-digit", month: "short" }) : "—"; }
 
 // Minúsculas y sin tildes, para que "jose" encuentre "José".
 const norm = (v: string | null | undefined) => (v ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
@@ -19,11 +20,12 @@ const RESP_FILTERS = [
 ] as const;
 const SEND_FILTERS = [["", "Todos los envíos"], ["sin-enviar", "Sin enviar"], ["enviado", "Ya enviados"]] as const;
 
-type Search = { q?: string; resp?: string; envio?: string; ok?: string };
+type Search = { q?: string; resp?: string; envio?: string; ok?: string; ver?: string };
 
 export default async function AdminPage({ searchParams }: { searchParams: Promise<Search> }) {
   if (!(await isAdmin())) redirect("/admin/login");
-  const { q = "", resp = "", envio = "", ok } = await searchParams;
+  const { q = "", resp = "", envio = "", ok, ver } = await searchParams;
+  const detail: DetailKey | null = isDetailKey(ver) ? ver : null;
 
   const list = await db.query.invitations.findMany({ with: { guests: true }, orderBy: (t, { asc }) => asc(t.groupKey) });
   const needle = norm(q.trim());
@@ -61,17 +63,33 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         </div>
       </header>
 
-      <dl className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-5">
-        {[
-          ["Invitados", stats.total], ["Confirmados", stats.confirmed], ["No asisten", stats.declined],
-          ["Sin responder", stats.pending], ["Grupos respondieron", `${stats.groupsAnswered}/${list.length}`],
-        ].map(([k, v]) => (
-          <div key={String(k)} className="rounded border border-neutral-300 p-3">
-            <dt className="text-sm text-neutral-600">{k}</dt>
-            <dd className="text-2xl">{v}</dd>
-          </div>
-        ))}
-      </dl>
+      <nav aria-label="Resumen" className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-5">
+        {([
+          ["Invitados", stats.total, null],
+          ["Confirmados", stats.confirmed, "confirmados"],
+          ["No asisten", stats.declined, "no-asisten"],
+          ["Sin responder", stats.pending, "sin-responder"],
+          ["Grupos respondieron", `${stats.groupsAnswered}/${list.length}`, "grupos"],
+        ] as [string, string | number, DetailKey | null][]).map(([label, value, key]) => {
+          const inner = (
+            <>
+              <span className="block text-sm text-neutral-600">{label}</span>
+              <span className="block text-2xl">{value}</span>
+              {key && <span className="mt-1 block text-xs text-neutral-500 underline underline-offset-2">{detail === key ? "Ocultar detalle" : "Ver detalle"}</span>}
+            </>
+          );
+          if (!key) return <div key={label} className="rounded border border-neutral-300 p-3">{inner}</div>;
+          const active = detail === key;
+          return (
+            <a key={label} href={active ? "/admin" : `/admin?ver=${key}#detalle`} aria-current={active ? "true" : undefined}
+              className={`block rounded border p-3 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900 ${
+                active ? "border-neutral-900 bg-white" : "border-neutral-300 hover:border-neutral-500 hover:bg-white/60 active:bg-white"}`}>
+              {inner}
+            </a>
+          );
+        })}
+      </nav>
+      {detail && <StatsDetail list={list} ver={detail} />}
 
       <FlashToast message={ok === "eliminado" ? "Grupo eliminado." : undefined} />
 
