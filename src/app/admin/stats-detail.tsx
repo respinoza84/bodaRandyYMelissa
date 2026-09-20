@@ -1,7 +1,7 @@
 import type { Guest } from "@/db/schema";
 import { wedding } from "@/config/wedding";
 import { whatsappLink, whatsappReminderLink } from "@/lib/whatsapp";
-import { daysToDeadline, firstSent, isUnsent, needsReminder, pendingGuests, recentlyReminded, type Group } from "@/lib/outreach";
+import { daysToDeadline, firstContact, firstSent, isUnsent, needsReminder, pendingGuests, recentlyReminded, reachedInvite, type Group } from "@/lib/outreach";
 import { buttonClass, linkClass } from "./button-styles";
 import { markReminderSentAction, markWhatsappSentAction, sendBulkEmailsAction, sendEmailAction, sendReminderEmailAction } from "./actions";
 import { ActionForm } from "./toast";
@@ -71,16 +71,17 @@ export function StatsDetail({ list, ver }: { list: Group[]; ver: DetailKey }) {
     );
   } else if (ver === "sin-responder") {
     const mine = rows.filter((r) => r.guest.status === "pending");
-    const sent = mine.filter((r) => firstSent(r.inv)).sort((a, b) => time(firstSent(a.inv)) - time(firstSent(b.inv)));
-    const unsent = mine.filter((r) => !firstSent(r.inv)).sort((a, b) => (a.inv.groupKey ?? "").localeCompare(b.inv.groupKey ?? ""));
+    const sent = mine.filter((r) => reachedInvite(r.inv)).sort((a, b) => time(firstContact(a.inv)) - time(firstContact(b.inv)));
+    const unsent = mine.filter((r) => !reachedInvite(r.inv)).sort((a, b) => (a.inv.groupKey ?? "").localeCompare(b.inv.groupKey ?? ""));
     title = `Sin responder (${mine.length})`;
-    summary = `${sent.length} en espera de respuesta (llevan más tiempo primero) · ${unsent.length} aún sin enviar.`;
+    summary = `${sent.length} en espera de respuesta (llevan más tiempo primero) · ${unsent.length} sin señal de que les haya llegado la invitación.`;
     body = mine.length === 0 ? (
       <p className="text-sm text-neutral-500">Todos han respondido.</p>
     ) : (
       <Table head={["Invitado", "Grupo", "Correo enviado", "WhatsApp enviado", "Estado"]}>
         {[...sent, ...unsent].map((r) => {
           const first = firstSent(r.inv);
+          const opened = r.inv.viewedAt;
           return (
             <tr key={r.guest.id} className="border-t border-neutral-200">
               <td className="py-2 pr-4 align-top font-medium">{r.guest.name}</td>
@@ -90,7 +91,9 @@ export function StatsDetail({ list, ver }: { list: Group[]; ver: DetailKey }) {
               <td className={td}>
                 {first
                   ? <span className="text-amber-800">Esperando confirmación desde {ago(first)}</span>
-                  : <span className="text-neutral-500">Aún no se ha enviado</span>}
+                  : opened
+                    ? <span className="text-amber-800">Abrió el enlace {when(opened)} (sin registro de envío), aún sin responder</span>
+                    : <span className="text-neutral-500">Aún no se ha enviado</span>}
               </td>
             </tr>
           );
@@ -102,7 +105,7 @@ export function StatsDetail({ list, ver }: { list: Group[]; ver: DetailKey }) {
     const withEmail = unsent.filter((g) => g.email);
     const noContact = unsent.filter((g) => !g.email && !g.phone);
     title = `Sin enviar (${unsent.length} grupos)`;
-    summary = `${withEmail.length} tienen correo · ${unsent.filter((g) => g.phone).length} tienen teléfono · ${noContact.length} sin ningún contacto (avisar en persona).`;
+    summary = `Sin envío registrado y sin haber abierto el enlace. ${withEmail.length} tienen correo · ${unsent.filter((g) => g.phone).length} tienen teléfono · ${noContact.length} sin ningún contacto (avisar en persona).`;
     body = unsent.length === 0 ? (
       <p className="text-sm text-neutral-500">A todos los grupos ya se les envió la invitación.</p>
     ) : (
@@ -147,7 +150,7 @@ export function StatsDetail({ list, ver }: { list: Group[]; ver: DetailKey }) {
     );
   } else if (ver === "recordatorios") {
     const due = list.filter(needsReminder).sort((a, b) =>
-      (a.reminderCount - b.reminderCount) || (time(firstSent(a)) - time(firstSent(b))));
+      (a.reminderCount - b.reminderCount) || (time(firstContact(a)) - time(firstContact(b))));
     const eligible = due.filter((g) => g.email && !recentlyReminded(g));
     const days = daysToDeadline(wedding.rsvpDeadline);
     const deadline = days > 0 ? `Faltan ${days} días para el ${wedding.rsvpDeadlineLabel}.` : days === 0 ? `Hoy vence el plazo (${wedding.rsvpDeadlineLabel}).` : `El plazo del ${wedding.rsvpDeadlineLabel} ya venció.`;
@@ -173,7 +176,11 @@ export function StatsDetail({ list, ver }: { list: Group[]; ver: DetailKey }) {
               <tr key={inv.id} className="border-t border-neutral-200">
                 <td className="py-2 pr-4 align-top font-medium"><GroupLink inv={inv} /></td>
                 <td className={td}>{pending.map((g) => <div key={g.id}>{g.name}</div>)}</td>
-                <td className={td}>{when(first)}{first && <div className="text-xs text-neutral-500">{ago(first)}</div>}</td>
+                <td className={td}>
+                  {first ? <>{when(first)}<div className="text-xs text-neutral-500">{ago(first)}</div></>
+                    : inv.viewedAt ? <><span className="text-neutral-500">Sin registro de envío</span><div className="text-xs text-neutral-500">abrió el enlace {when(inv.viewedAt)}</div></>
+                    : "—"}
+                </td>
                 <td className={td}>
                   {inv.remindedAt ? <>{when(inv.remindedAt)}<div className="text-xs text-neutral-500">{inv.reminderCount} {inv.reminderCount === 1 ? "vez" : "veces"}</div></> : <span className="text-neutral-500">Nunca</span>}
                 </td>

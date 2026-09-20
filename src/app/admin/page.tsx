@@ -20,7 +20,7 @@ const norm = (v: string | null | undefined) => (v ?? "").normalize("NFD").replac
 const RESP_FILTERS = [
   ["", "Todas las respuestas"], ["sin-responder", "Sin responder"], ["respondieron", "Ya respondieron"], ["incompleto", "Respuesta incompleta"],
 ] as const;
-const SEND_FILTERS = [["", "Todos los envíos"], ["sin-enviar", "Sin enviar"], ["enviado", "Ya enviados"]] as const;
+const SEND_FILTERS = [["", "Todos los envíos"], ["sin-enviar", "Sin enviar"], ["enviado", "Ya recibieron la invitación"]] as const;
 
 type Search = { q?: string; resp?: string; envio?: string; ok?: string; ver?: string };
 
@@ -33,7 +33,6 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   const needle = norm(q.trim());
   const shown = list.filter((inv) => {
     const pending = inv.guests.filter((g) => g.status === "pending").length;
-    const sent = !!(inv.sentEmailAt || inv.sentWhatsappAt);
     if (needle) {
       const hay = norm([inv.groupKey, inv.contactName, inv.email, inv.phone, ...inv.guests.map((g) => g.name)].join(" "));
       if (!hay.includes(needle)) return false;
@@ -41,8 +40,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
     if (resp === "sin-responder" && pending !== inv.guests.length) return false;
     if (resp === "respondieron" && pending === inv.guests.length) return false;
     if (resp === "incompleto" && !(pending > 0 && pending < inv.guests.length)) return false;
-    if (envio === "sin-enviar" && sent) return false;
-    if (envio === "enviado" && !sent) return false;
+    if (envio === "sin-enviar" && !isUnsent(inv)) return false;
+    if (envio === "enviado" && isUnsent(inv)) return false;
     return true;
   });
   const all = list.flatMap((i) => i.guests);
@@ -171,7 +170,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                     </SubmitButton>
                     {inv.sentEmailAt
                       ? <div className="mt-1 text-xs text-green-700">✓ enviado {fmt(inv.sentEmailAt)}</div>
-                      : <div className="mt-1 text-xs text-neutral-500">sin enviar</div>}
+                      : <div className="mt-1 text-xs text-neutral-500">{inv.viewedAt || inv.respondedAt ? "sin registro (ya abrió el enlace)" : "sin enviar"}</div>}
                   </ActionForm>
                 ) : "—"}
               </td>

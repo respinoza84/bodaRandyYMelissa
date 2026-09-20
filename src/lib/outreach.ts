@@ -7,10 +7,17 @@ export const wasSent = (g: Group) => !!(g.sentEmailAt || g.sentWhatsappAt);
 export const firstSent = (g: Group) =>
   [g.sentEmailAt, g.sentWhatsappAt].filter((d): d is Date => !!d).sort((a, b) => a.getTime() - b.getTime())[0] ?? null;
 
-// Aún no se le ha enviado la invitación por ningún canal.
-export const isUnsent = (g: Group) => !wasSent(g);
-// Ya se le envió la invitación y todavía hay personas sin responder.
-export const needsReminder = (g: Group) => wasSent(g) && pendingGuests(g).length > 0;
+export const hasAnswered = (g: Group) => !!g.respondedAt || g.guests.some((x) => x.status !== "pending");
+// La invitación le llegó: se registró un envío, o ya abrió el enlace o respondió (aunque nadie lo marcara como enviado,
+// p. ej. porque el enlace se mandó por WhatsApp a mano).
+export const reachedInvite = (g: Group) => wasSent(g) || !!g.viewedAt || hasAnswered(g);
+// Primera evidencia de que le llegó: la fecha de envío o, si no hay registro, cuándo abrió el enlace.
+export const firstContact = (g: Group) => firstSent(g) ?? g.viewedAt ?? g.respondedAt ?? null;
+
+// Sin ninguna señal de que le haya llegado la invitación.
+export const isUnsent = (g: Group) => !reachedInvite(g);
+// La invitación le llegó y todavía hay personas sin responder.
+export const needsReminder = (g: Group) => reachedInvite(g) && pendingGuests(g).length > 0;
 
 export const daysToDeadline = (deadline: Date) => Math.ceil((deadline.getTime() - Date.now()) / 86_400_000);
 
