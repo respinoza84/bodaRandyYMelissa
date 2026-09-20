@@ -12,6 +12,7 @@ export const wedding = {
   city: "San Isidro de Heredia",
   mapsUrl: "https://www.google.com/maps/search/?api=1&query=Sala+de+Eventos+La+Alborada+San+Isidro+de+Heredia",
   rsvpDeadlineLabel: "8 de noviembre",
+  rsvpDeadline: new Date("2026-11-08T23:59:59-06:00"), // fin del día, hora de Costa Rica
   rsvpPhone: "8883 7958",
   verse: "Por encima de todo, vístanse de amor, que es el vínculo perfecto",
   verseRef: "Colosenses 3:14",

@@ -32,3 +32,19 @@ export function whatsappLink(phone: string | null, contactName: string, code: st
   const base = phone ? `https://wa.me/${phone.replace(/\D/g, "")}` : "https://wa.me/";
   return `${base}?text=${encodeURIComponent(text)}`;
 }
+
+// Recordatorio para quienes aún no confirman. `pendingCount` = personas de la invitación que faltan por responder.
+export function whatsappReminderLink(phone: string | null, contactName: string, code: string, pendingCount: number) {
+  const plural = pendingCount > 1;
+  const text = plural
+    ? `¡Hola ${contactName}! Somos ${wedding.couple} 💍\n` +
+      `Les escribimos para recordarles que aún nos falta la confirmación de ${pendingCount} personas de su invitación.\n` +
+      `Pueden confirmar aquí:\n${invitationUrl(code)}\n` +
+      `Necesitamos su respuesta antes del ${wedding.rsvpDeadlineLabel}. ¡Gracias!`
+    : `¡Hola ${contactName}! Somos ${wedding.couple} 💍\n` +
+      `Te escribimos para recordarte que aún no tenemos tu confirmación de asistencia.\n` +
+      `Puedes confirmar aquí:\n${invitationUrl(code)}\n` +
+      `Necesitamos tu respuesta antes del ${wedding.rsvpDeadlineLabel}. ¡Gracias!`;
+  const base = phone ? `https://wa.me/${phone.replace(/\D/g, "")}` : "https://wa.me/";
+  return `${base}?text=${encodeURIComponent(text)}`;
+}

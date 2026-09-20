@@ -15,6 +15,8 @@ export const invitations = pgTable("invitations", {
   phone: text("phone"),                           // formato E.164 sin '+', ej. 50688881234
   sentEmailAt: timestamp("sent_email_at", { withTimezone: true }),
   sentWhatsappAt: timestamp("sent_whatsapp_at", { withTimezone: true }),
+  remindedAt: timestamp("reminded_at", { withTimezone: true }),   // último recordatorio (correo o WhatsApp)
+  reminderCount: integer("reminder_count").default(0).notNull(),
   viewedAt: timestamp("viewed_at", { withTimezone: true }),
   respondedAt: timestamp("responded_at", { withTimezone: true }),
   notes: text("notes"),

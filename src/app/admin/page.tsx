@@ -7,6 +7,8 @@ import { ActionForm, FlashToast } from "./toast";
 import { SubmitButton } from "./submit-button";
 import { buttonClass, linkClass } from "./button-styles";
 import { StatsDetail, isDetailKey, type DetailKey } from "./stats-detail";
+import { wedding } from "@/config/wedding";
+import { daysToDeadline, isUnsent, needsReminder } from "@/lib/outreach";
 
 export const dynamic = "force-dynamic";
 
@@ -63,32 +65,51 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         </div>
       </header>
 
-      <nav aria-label="Resumen" className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-5">
-        {([
-          ["Invitados", stats.total, null],
-          ["Confirmados", stats.confirmed, "confirmados"],
-          ["No asisten", stats.declined, "no-asisten"],
-          ["Sin responder", stats.pending, "sin-responder"],
-          ["Grupos respondieron", `${stats.groupsAnswered}/${list.length}`, "grupos"],
-        ] as [string, string | number, DetailKey | null][]).map(([label, value, key]) => {
-          const inner = (
-            <>
-              <span className="block text-sm text-neutral-600">{label}</span>
-              <span className="block text-2xl">{value}</span>
-              {key && <span className="mt-1 block text-xs text-neutral-500 underline underline-offset-2">{detail === key ? "Ocultar detalle" : "Ver detalle"}</span>}
-            </>
-          );
-          if (!key) return <div key={label} className="rounded border border-neutral-300 p-3">{inner}</div>;
-          const active = detail === key;
-          return (
-            <a key={label} href={active ? "/admin" : `/admin?ver=${key}#detalle`} aria-current={active ? "true" : undefined}
-              className={`block rounded border p-3 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900 ${
-                active ? "border-neutral-900 bg-white" : "border-neutral-300 hover:border-neutral-500 hover:bg-white/60 active:bg-white"}`}>
-              {inner}
-            </a>
-          );
-        })}
-      </nav>
+      {(() => {
+        type Card = [label: string, value: string | number, key: DetailKey | null, hint?: string];
+        const days = daysToDeadline(wedding.rsvpDeadline);
+        const row = (label: string, cards: Card[], cols: string) => (
+          <nav aria-label={label} className={`mt-4 grid grid-cols-2 gap-4 ${cols}`}>
+            {cards.map(([name, value, key, hint]) => {
+              const inner = (
+                <>
+                  <span className="block text-sm text-neutral-600">{name}</span>
+                  <span className="block text-2xl">{value}</span>
+                  {key && <span className="mt-1 block text-xs text-neutral-500 underline underline-offset-2">{detail === key ? "Ocultar detalle" : "Ver detalle"}</span>}
+                  {!key && hint && <span className="mt-1 block text-xs text-neutral-500">{hint}</span>}
+                </>
+              );
+              if (!key) return <div key={name} className="rounded border border-neutral-300 p-3">{inner}</div>;
+              const active = detail === key;
+              return (
+                <a key={name} href={active ? "/admin" : `/admin?ver=${key}#detalle`} aria-current={active ? "true" : undefined}
+                  className={`block rounded border p-3 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-900 ${
+                    active ? "border-neutral-900 bg-white" : "border-neutral-300 hover:border-neutral-500 hover:bg-white/60 active:bg-white"}`}>
+                  {inner}
+                </a>
+              );
+            })}
+          </nav>
+        );
+        return (
+          <>
+            <div className="mt-6">
+              {row("Resumen", [
+                ["Invitados", stats.total, null],
+                ["Confirmados", stats.confirmed, "confirmados"],
+                ["No asisten", stats.declined, "no-asisten"],
+                ["Sin responder", stats.pending, "sin-responder"],
+                ["Grupos respondieron", `${stats.groupsAnswered}/${list.length}`, "grupos"],
+              ], "sm:grid-cols-5")}
+            </div>
+            {row("Envíos", [
+              ["Grupos sin enviar", list.filter(isUnsent).length, "sin-enviar"],
+              ["Grupos por recordar", list.filter(needsReminder).length, "recordatorios"],
+              [`Fecha límite · ${wedding.rsvpDeadlineLabel}`, days > 0 ? `${days} días` : days === 0 ? "Vence hoy" : "Vencido", null, "para confirmar asistencia"],
+            ], "sm:grid-cols-3")}
+          </>
+        );
+      })()}
       {detail && <StatsDetail list={list} ver={detail} />}
 
       <FlashToast message={ok === "eliminado" ? "Grupo eliminado." : undefined} />

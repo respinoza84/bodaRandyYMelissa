@@ -2,14 +2,15 @@
 
 import { db } from "@/db";
 import { guests, invitations } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { randomBytes } from "node:crypto";
 import { normalizePhone } from "@/lib/phone";
 import type { ActionResult } from "./toast";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { isAdmin, logoutAdmin } from "@/lib/auth";
-import { sendInvitationEmail } from "@/lib/email";
+import { buildInvitationEmail, buildReminderEmail, sendEmailBatch, sendInvitationEmail, sendReminderEmail, type EmailPayload } from "@/lib/email";
+import { isUnsent, needsReminder, pendingGuests, recentlyReminded, type Group } from "@/lib/outreach";
 
 async function guard() { if (!(await isAdmin())) throw new Error("No autorizado"); }
 
@@ -34,6 +35,83 @@ export async function sendEmailAction(invitationId: number): Promise<ActionResul
   await db.update(invitations).set({ sentEmailAt: new Date() }).where(eq(invitations.id, invitationId));
   revalidatePath("/admin");
   return { ok: true, message: `Correo ${inv.sentEmailAt ? "reenviado" : "enviado"} a ${inv.email}.` };
+}
+
+// --- Recordatorios ---
+
+const RECENT_MS = 15_000;
+
+export async function sendReminderEmailAction(invitationId: number): Promise<ActionResult> {
+  await guard();
+  const inv = await db.query.invitations.findFirst({ where: eq(invitations.id, invitationId), with: { guests: true } });
+  if (!inv) return { ok: false, message: "El grupo ya no existe." };
+  if (!inv.email) return { ok: false, message: "Este grupo no tiene correo." };
+  const pending = pendingGuests(inv);
+  if (!pending.length) return { ok: false, message: "Todos en este grupo ya respondieron." };
+  // Protección contra doble clic o varias pestañas.
+  if (inv.remindedAt && Date.now() - inv.remindedAt.getTime() < RECENT_MS) {
+    return { ok: true, message: `Ya se envió un recordatorio a ${inv.email} hace un momento.` };
+  }
+  if (!process.env.RESEND_API_KEY) return { ok: false, message: "Falta configurar RESEND_API_KEY en Vercel." };
+
+  try {
+    const res = await sendReminderEmail(inv.email, inv.contactName, inv.code, pending.map((g) => g.name));
+    if (res.error) return { ok: false, message: `No se pudo enviar a ${inv.email}: ${res.error.message}` };
+  } catch (e) {
+    console.error(e);
+    return { ok: false, message: `No se pudo enviar a ${inv.email}. Intentá de nuevo.` };
+  }
+  await db.update(invitations).set({ remindedAt: new Date(), reminderCount: sql`${invitations.reminderCount} + 1` }).where(eq(invitations.id, invitationId));
+  revalidatePath("/admin");
+  return { ok: true, message: `Recordatorio enviado a ${inv.email}.` };
+}
+
+// El recordatorio por WhatsApp se envía a mano desde el teléfono; esto solo lo deja registrado.
+export async function markReminderSentAction(invitationId: number): Promise<ActionResult> {
+  await guard();
+  await db.update(invitations).set({ remindedAt: new Date(), reminderCount: sql`${invitations.reminderCount} + 1` }).where(eq(invitations.id, invitationId));
+  revalidatePath("/admin");
+  return { ok: true, message: "Recordatorio por WhatsApp registrado." };
+}
+
+// Envío en lote por correo. `kind`: invitación a quienes no la han recibido, o recordatorio a quienes no responden.
+export async function sendBulkEmailsAction(kind: "invitation" | "reminder"): Promise<ActionResult> {
+  await guard();
+  if (!process.env.RESEND_API_KEY) return { ok: false, message: "Falta configurar RESEND_API_KEY en Vercel." };
+
+  const all: Group[] = await db.query.invitations.findMany({ with: { guests: true } });
+  const targets = all.filter((g) => g.email && (kind === "invitation" ? isUnsent(g) : needsReminder(g) && !recentlyReminded(g)));
+  const skipped = kind === "reminder" ? all.filter((g) => g.email && needsReminder(g) && recentlyReminded(g)).length : 0;
+  if (!targets.length) {
+    return { ok: false, message: kind === "invitation" ? "No hay grupos con correo pendientes de invitación." : `No hay grupos por recordar${skipped ? ` (${skipped} ya se recordaron hace menos de 12 horas)` : ""}.` };
+  }
+
+  let sent = 0;
+  for (let i = 0; i < targets.length; i += 50) {
+    const chunk = targets.slice(i, i + 50);
+    const payloads: EmailPayload[] = chunk.map((g) =>
+      kind === "invitation"
+        ? buildInvitationEmail(g.email!, g.contactName, g.code, g.guests.length)
+        : buildReminderEmail(g.email!, g.contactName, g.code, pendingGuests(g).map((x) => x.name)));
+    try {
+      const res = await sendEmailBatch(payloads);
+      if (res.error) throw new Error(res.error.message);
+    } catch (e) {
+      console.error(e);
+      revalidatePath("/admin");
+      return { ok: false, message: `Se enviaron ${sent} de ${targets.length}. Falló un lote: ${e instanceof Error ? e.message : "error desconocido"}.` };
+    }
+    const now = new Date();
+    await Promise.all(chunk.map((g) => db.update(invitations).set(
+      kind === "invitation"
+        ? { sentEmailAt: now }
+        : { remindedAt: now, reminderCount: sql`${invitations.reminderCount} + 1` },
+    ).where(eq(invitations.id, g.id))));
+    sent += chunk.length;
+  }
+  revalidatePath("/admin");
+  const what = kind === "invitation" ? "invitaciones" : "recordatorios";
+  return { ok: true, message: `Se enviaron ${sent} ${what} por correo${skipped ? ` (${skipped} omitidos: recordados hace menos de 12 horas)` : ""}.` };
 }
 
 export async function markWhatsappSentAction(invitationId: number): Promise<ActionResult> {

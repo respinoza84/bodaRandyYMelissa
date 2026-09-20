@@ -1,25 +1,31 @@
-import type { Guest, Invitation } from "@/db/schema";
-import { linkClass } from "./button-styles";
+import type { Guest } from "@/db/schema";
+import { wedding } from "@/config/wedding";
+import { whatsappLink, whatsappReminderLink } from "@/lib/whatsapp";
+import { daysToDeadline, firstSent, isUnsent, needsReminder, pendingGuests, recentlyReminded, type Group } from "@/lib/outreach";
+import { buttonClass, linkClass } from "./button-styles";
+import { markReminderSentAction, markWhatsappSentAction, sendBulkEmailsAction, sendEmailAction, sendReminderEmailAction } from "./actions";
+import { ActionForm } from "./toast";
+import { SubmitButton } from "./submit-button";
 
-type Group = Invitation & { guests: Guest[] };
 type Row = { guest: Guest; inv: Group };
 
-export type DetailKey = "confirmados" | "no-asisten" | "sin-responder" | "grupos";
+export type DetailKey = "confirmados" | "no-asisten" | "sin-responder" | "grupos" | "sin-enviar" | "recordatorios";
 export const isDetailKey = (v: string | undefined): v is DetailKey =>
-  v === "confirmados" || v === "no-asisten" || v === "sin-responder" || v === "grupos";
+  v === "confirmados" || v === "no-asisten" || v === "sin-responder" || v === "grupos" || v === "sin-enviar" || v === "recordatorios";
 
 // Fecha y hora en hora de Costa Rica (el servidor de Vercel corre en UTC).
 export const when = (d: Date | null | undefined) =>
   d ? d.toLocaleString("es-CR", { timeZone: "America/Costa_Rica", day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" }) : "—";
 
+// Días calendario transcurridos en hora de Costa Rica (UTC-6, sin cambio de horario): un envío de ayer en la noche es "hace 1 día", no "hoy".
+const crDay = (d: Date) => Math.floor((d.getTime() - 6 * 3_600_000) / 86_400_000);
 function ago(d: Date) {
-  const days = Math.floor((Date.now() - d.getTime()) / 86_400_000);
+  const days = crDay(new Date()) - crDay(d);
   return days <= 0 ? "hoy" : days === 1 ? "hace 1 día" : `hace ${days} días`;
 }
 
 const answeredAt = ({ guest, inv }: Row) => guest.respondedAt ?? inv.respondedAt;
 const time = (d: Date | null | undefined) => d?.getTime() ?? 0;
-const firstSent = (inv: Group) => [inv.sentEmailAt, inv.sentWhatsappAt].filter((d): d is Date => !!d).sort((a, b) => a.getTime() - b.getTime())[0] ?? null;
 
 function GroupLink({ inv }: { inv: Group }) {
   return <a href={`/admin/grupo/${inv.id}`} className={linkClass}>{inv.groupKey} · {inv.contactName}</a>;
@@ -53,13 +59,12 @@ export function StatsDetail({ list, ver }: { list: Group[]; ver: DetailKey }) {
     body = mine.length === 0 ? (
       <p className="text-sm text-neutral-500">{ver === "confirmados" ? "Nadie ha confirmado todavía." : "Nadie ha indicado que no asiste."}</p>
     ) : (
-      <Table head={["Invitado", "Grupo", ver === "confirmados" ? "Confirmó (fecha y hora)" : "Indicó que no asiste (fecha y hora)", ...(ver === "confirmados" ? ["Alergias / dieta"] : [])]}>
+      <Table head={["Invitado", "Grupo", ver === "confirmados" ? "Confirmó (fecha y hora)" : "Indicó que no asiste (fecha y hora)"]}>
         {mine.map((r) => (
           <tr key={r.guest.id} className="border-t border-neutral-200">
             <td className="py-2 pr-4 align-top font-medium">{r.guest.name}</td>
             <td className={td}><GroupLink inv={r.inv} /></td>
             <td className={td}>{when(answeredAt(r))}</td>
-            {ver === "confirmados" && <td className={td}>{r.guest.dietary ?? "—"}</td>}
           </tr>
         ))}
       </Table>
@@ -91,6 +96,110 @@ export function StatsDetail({ list, ver }: { list: Group[]; ver: DetailKey }) {
           );
         })}
       </Table>
+    );
+  } else if (ver === "sin-enviar") {
+    const unsent = list.filter(isUnsent).sort((a, b) => (a.groupKey ?? "").localeCompare(b.groupKey ?? ""));
+    const withEmail = unsent.filter((g) => g.email);
+    const noContact = unsent.filter((g) => !g.email && !g.phone);
+    title = `Sin enviar (${unsent.length} grupos)`;
+    summary = `${withEmail.length} tienen correo · ${unsent.filter((g) => g.phone).length} tienen teléfono · ${noContact.length} sin ningún contacto (avisar en persona).`;
+    body = unsent.length === 0 ? (
+      <p className="text-sm text-neutral-500">A todos los grupos ya se les envió la invitación.</p>
+    ) : (
+      <>
+        {withEmail.length > 0 && (
+          <ActionForm action={sendBulkEmailsAction.bind(null, "invitation")} className="mb-4">
+            <SubmitButton variant="primary" size="md" pendingLabel="Enviando…"
+              confirm={`¿Enviar la invitación por correo a ${withEmail.length} grupos? Se enviarán correos reales.`}>
+              Enviar invitación por correo a los {withEmail.length} con correo
+            </SubmitButton>
+          </ActionForm>
+        )}
+        <Table head={["Grupo", "Invitados", "Correo", "Teléfono", "Enviar"]}>
+          {unsent.map((inv) => (
+            <tr key={inv.id} className="border-t border-neutral-200">
+              <td className="py-2 pr-4 align-top font-medium"><GroupLink inv={inv} /></td>
+              <td className={td}>{inv.guests.map((g) => <div key={g.id}>{g.name}</div>)}</td>
+              <td className={td}>{inv.email ?? "—"}</td>
+              <td className={td}>{inv.phone ?? "—"}</td>
+              <td className={td}>
+                <div className="flex flex-wrap items-start gap-2">
+                  {inv.email && (
+                    <ActionForm action={sendEmailAction.bind(null, inv.id)}>
+                      <SubmitButton variant="primary" pendingLabel="Enviando…">Enviar correo</SubmitButton>
+                    </ActionForm>
+                  )}
+                  {inv.phone && (
+                    <div>
+                      <a href={whatsappLink(inv.phone, inv.contactName, inv.code, inv.guests.length)} target="_blank" rel="noreferrer" className={buttonClass("secondary")}>Abrir WhatsApp</a>
+                      <ActionForm action={markWhatsappSentAction.bind(null, inv.id)} className="mt-1">
+                        <SubmitButton asLink pendingLabel="Guardando…" className="text-xs">marcar enviado</SubmitButton>
+                      </ActionForm>
+                    </div>
+                  )}
+                  {!inv.email && !inv.phone && <span className="text-neutral-500">Sin contacto: avisar en persona</span>}
+                </div>
+              </td>
+            </tr>
+          ))}
+        </Table>
+      </>
+    );
+  } else if (ver === "recordatorios") {
+    const due = list.filter(needsReminder).sort((a, b) =>
+      (a.reminderCount - b.reminderCount) || (time(firstSent(a)) - time(firstSent(b))));
+    const eligible = due.filter((g) => g.email && !recentlyReminded(g));
+    const days = daysToDeadline(wedding.rsvpDeadline);
+    const deadline = days > 0 ? `Faltan ${days} días para el ${wedding.rsvpDeadlineLabel}.` : days === 0 ? `Hoy vence el plazo (${wedding.rsvpDeadlineLabel}).` : `El plazo del ${wedding.rsvpDeadlineLabel} ya venció.`;
+    title = `Por recordar (${due.length} grupos)`;
+    summary = `${deadline} Primero los que nunca se han recordado y llevan más tiempo esperando.`;
+    body = due.length === 0 ? (
+      <p className="text-sm text-neutral-500">No hay grupos por recordar: todos respondieron o aún no se les envía la invitación.</p>
+    ) : (
+      <>
+        {eligible.length > 0 && (
+          <ActionForm action={sendBulkEmailsAction.bind(null, "reminder")} className="mb-4">
+            <SubmitButton variant="primary" size="md" pendingLabel="Enviando…"
+              confirm={`¿Enviar el recordatorio por correo a ${eligible.length} grupos? Se enviarán correos reales.`}>
+              Enviar recordatorio por correo a los {eligible.length} con correo
+            </SubmitButton>
+          </ActionForm>
+        )}
+        <Table head={["Grupo", "Falta responder", "Invitación enviada", "Último recordatorio", "Recordar"]}>
+          {due.map((inv) => {
+            const first = firstSent(inv);
+            const pending = pendingGuests(inv);
+            return (
+              <tr key={inv.id} className="border-t border-neutral-200">
+                <td className="py-2 pr-4 align-top font-medium"><GroupLink inv={inv} /></td>
+                <td className={td}>{pending.map((g) => <div key={g.id}>{g.name}</div>)}</td>
+                <td className={td}>{when(first)}{first && <div className="text-xs text-neutral-500">{ago(first)}</div>}</td>
+                <td className={td}>
+                  {inv.remindedAt ? <>{when(inv.remindedAt)}<div className="text-xs text-neutral-500">{inv.reminderCount} {inv.reminderCount === 1 ? "vez" : "veces"}</div></> : <span className="text-neutral-500">Nunca</span>}
+                </td>
+                <td className={td}>
+                  <div className="flex flex-wrap items-start gap-2">
+                    {inv.email && (
+                      <ActionForm action={sendReminderEmailAction.bind(null, inv.id)}>
+                        <SubmitButton variant={inv.remindedAt ? "secondary" : "primary"} pendingLabel="Enviando…">Recordar por correo</SubmitButton>
+                      </ActionForm>
+                    )}
+                    {inv.phone && (
+                      <div>
+                        <a href={whatsappReminderLink(inv.phone, inv.contactName, inv.code, pending.length)} target="_blank" rel="noreferrer" className={buttonClass("secondary")}>Recordar por WhatsApp</a>
+                        <ActionForm action={markReminderSentAction.bind(null, inv.id)} className="mt-1">
+                          <SubmitButton asLink pendingLabel="Guardando…" className="text-xs">marcar recordado</SubmitButton>
+                        </ActionForm>
+                      </div>
+                    )}
+                    {!inv.email && !inv.phone && <span className="text-neutral-500">Sin contacto: avisar en persona</span>}
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </Table>
+      </>
     );
   } else {
     const answered = list.filter((i) => i.respondedAt).sort((a, b) => time(b.respondedAt) - time(a.respondedAt));
