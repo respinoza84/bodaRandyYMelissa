@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bodas Costa Rica — Fotografía, Invitaciones Digitales, Wedding Planning</title>
+<meta name="description" content="Servicios profesionales para bodas en Costa Rica: fotografía, invitaciones digitales, diseño de invitaciones, save the date y wedding planning. Hacemos realidad la boda de tus sueños.">
+<meta name="keywords" content="bodas Costa Rica, wedding planner Costa Rica, fotografía de bodas, invitaciones digitales, diseño de invitaciones, save the date, RSVP online, confirmación de asistencia, sitio web de boda, planificación de bodas, organización de bodas, bodas en Costa Rica, wedding planning Costa Rica, invitaciones de boda, fotógrafo de bodas Costa Rica">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600&display=swap">
+<style>
+:root{--bg:#faf8f5;--bg-alt:#f0ede8;--fg:#2d2a26;--fg-muted:#6b6560;--accent:#7a8b6a;--accent-deep:#5c6b4e;--accent-light:#c5d4b8;--warm:#c8a882;--warm-light:#e8ddd0;--display:'Cormorant Garamond','Georgia',serif;--body:'Outfit','Segoe UI',sans-serif;--max-w:1100px;--gutter:16px}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1a1916;--bg-alt:#242220;--fg:#e8e4df;--fg-muted:#9e9890;--accent:#9aad88;--accent-deep:#b0c49e;--accent-light:#3d4a34;--warm:#c8a882;--warm-light:#3a3228;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1a1916;--bg-alt:#242220;--fg:#e8e4df;--fg-muted:#9e9890;--accent:#9aad88;--accent-deep:#b0c49e;--accent-light:#3d4a34;--warm:#c8a882;--warm-light:#3a3228;color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-weight:300;line-height:1.7;-webkit-font-smoothing:antialiased}
+.wrap{max-width:var(--max-w);margin:0 auto;padding-left:var(--gutter);padding-right:var(--gutter)}
+.hero{padding-block:5rem 4rem;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,var(--accent-light) 0%,transparent 70%);opacity:.3;pointer-events:none}
+.hero-eyebrow{font-family:var(--body);font-weight:500;font-size:.75rem;letter-spacing:.2em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:1.5rem}
+.hero h1{font-family:var(--display);font-weight:400;font-size:clamp(2.4rem,6vw,4.2rem);line-height:1.15;text-wrap:balance;color:var(--fg);margin:0 0 1rem}
+.hero h1 em{font-style:italic;color:var(--accent-deep)}
+.hero-sub{font-size:1.1rem;color:var(--fg-muted);max-width:580px;margin:0 auto 2.5rem;line-height:1.8}
+.hero-cta{display:inline-flex;align-items:center;gap:.6rem;background:var(--accent-deep);color:#fff;font-family:var(--body);font-weight:500;font-size:1rem;padding:.9rem 2rem;border-radius:50px;text-decoration:none;transition:background .25s,transform .2s}
+.hero-cta:hover{background:var(--accent);transform:translateY(-1px)}
+.hero-cta svg{width:20px;height:20px;fill:currentColor}
+.intro{padding-block:3rem 4rem}
+.intro-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center}
+@media(max-width:700px){.intro-grid{grid-template-columns:1fr;gap:2rem}}
+.intro-img{aspect-ratio:4/5;background:var(--bg-alt);border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.intro-img-placeholder{font-family:var(--display);font-size:4rem;color:var(--accent-light);opacity:.5}
+.intro-text h2{font-family:var(--display);font-weight:600;font-size:clamp(1.6rem,3.5vw,2.2rem);line-height:1.25;text-wrap:balance;margin:0 0 1rem}
+.intro-text p{color:var(--fg-muted);margin:0 0 1rem}
+.intro-text p:last-child{margin-bottom:0}
+.services{background:var(--bg-alt);padding-block:4rem}
+.section-label{font-family:var(--body);font-weight:500;font-size:.75rem;letter-spacing:.2em;text-transform:uppercase;color:var(--accent-deep);text-align:center;margin-bottom:.75rem}
+.section-title{font-family:var(--display);font-weight:600;font-size:clamp(1.8rem,4vw,2.6rem);text-align:center;text-wrap:balance;margin:0 0 3rem;line-height:1.2}
+.services-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
+.service-card{background:var(--bg);border-radius:12px;padding:2rem 1.5rem;display:flex;flex-direction:column;gap:.75rem}
+.service-icon{width:44px;height:44px;border-radius:10px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;color:var(--accent-deep)}
+.service-icon svg{width:22px;height:22px;fill:currentColor}
+.service-card h3{font-family:var(--display);font-weight:600;font-size:1.3rem;margin:0}
+.service-card p{color:var(--fg-muted);font-size:.95rem;margin:0;line-height:1.7}
+.why{padding-block:4rem}
+.why-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:2rem;margin-top:2.5rem}
+.why-item{text-align:center}
+.why-num{font-family:var(--display);font-weight:700;font-size:2.8rem;color:var(--accent-deep);line-height:1;margin-bottom:.5rem}
+.why-item h4{font-family:var(--body);font-weight:500;font-size:.95rem;margin:0 0 .5rem}
+.why-item p{font-size:.9rem;color:var(--fg-muted);margin:0}
+.process{background:var(--bg-alt);padding-block:4rem}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:2rem;margin-top:2.5rem}
+.step{position:relative;padding-left:2.5rem}
+.step-num{position:absolute;left:0;top:.15rem;font-family:var(--display);font-weight:700;font-size:1.8rem;color:var(--accent-light);line-height:1}
+.step h4{font-family:var(--body);font-weight:500;font-size:.95rem;margin:0 0 .4rem}
+.step p{font-size:.88rem;color:var(--fg-muted);margin:0}
+.cta-section{padding-block:4rem;text-align:center}
+.cta-section h2{font-family:var(--display);font-weight:600;font-size:clamp(1.8rem,4vw,2.6rem);text-wrap:balance;margin:0 0 1rem;line-height:1.2}
+.cta-section p{color:var(--fg-muted);max-width:500px;margin:0 auto 2rem;font-size:1.05rem}
+.cta-whatsapp{display:inline-flex;align-items:center;gap:.6rem;background:#25d366;color:#fff;font-family:var(--body);font-weight:500;font-size:1.05rem;padding:1rem 2.2rem;border-radius:50px;text-decoration:none;transition:background .25s,transform .2s}
+.cta-whatsapp:hover{background:#1fb855;transform:translateY(-1px)}
+.cta-whatsapp svg{width:22px;height:22px;fill:currentColor}
+.cta-phone{display:block;margin-top:1.2rem;color:var(--fg-muted);font-size:.9rem}
+.portfolio{padding-block:4rem}
+.portfolio-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;margin-top:2.5rem}
+.portfolio-card{background:var(--bg-alt);border-radius:12px;overflow:hidden;text-decoration:none;color:var(--fg);transition:transform .25s,box-shadow .25s;display:block}
+.portfolio-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.08)}
+.portfolio-thumb{aspect-ratio:16/10;background:linear-gradient(135deg,var(--accent-light),var(--warm-light));display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.portfolio-thumb-inner{text-align:center}
+.portfolio-thumb-names{font-family:var(--display);font-weight:400;font-style:italic;font-size:2rem;color:var(--accent-deep);line-height:1.2}
+.portfolio-thumb-date{font-family:var(--body);font-size:.8rem;letter-spacing:.15em;text-transform:uppercase;color:var(--fg-muted);margin-top:.5rem}
+.portfolio-thumb-badge{position:absolute;top:12px;right:12px;background:var(--accent-deep);color:#fff;font-family:var(--body);font-size:.65rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;padding:.3rem .7rem;border-radius:20px}
+.portfolio-info{padding:1.25rem 1.5rem}
+.portfolio-info h3{font-family:var(--display);font-weight:600;font-size:1.2rem;margin:0 0 .4rem}
+.portfolio-info p{color:var(--fg-muted);font-size:.88rem;margin:0 0 .75rem;line-height:1.6}
+.portfolio-link{font-family:var(--body);font-weight:500;font-size:.85rem;color:var(--accent-deep);display:inline-flex;align-items:center;gap:.3rem}
+.portfolio-link::after{content:"→";transition:transform .2s}
+.portfolio-card:hover .portfolio-link::after{transform:translateX(3px)}
+.portfolio-coming{background:var(--bg-alt);border-radius:12px;border:2px dashed var(--warm-light);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 2rem;text-align:center;min-height:280px}
+.portfolio-coming h3{font-family:var(--display);font-weight:600;font-size:1.2rem;margin:0 0 .5rem;color:var(--fg-muted)}
+.portfolio-coming p{font-size:.88rem;color:var(--fg-muted);margin:0;opacity:.7}
+.seo-content{background:var(--bg-alt);padding-block:3.5rem}
+.seo-content h2{font-family:var(--display);font-weight:600;font-size:clamp(1.4rem,3vw,1.8rem);text-wrap:balance;margin:0 0 1rem}
+.seo-content p{color:var(--fg-muted);font-size:.95rem;margin:0 0 1rem}
+.seo-cols{display:grid;grid-template-columns:1fr 1fr;gap:2.5rem}
+@media(max-width:600px){.seo-cols{grid-template-columns:1fr;gap:1.5rem}}
+.faq{padding-block:4rem}
+.faq-list{max-width:700px;margin:2rem auto 0;display:flex;flex-direction:column;gap:1rem}
+.faq-item{border-bottom:1px solid var(--warm-light);padding-bottom:1rem}
+.faq-q{font-family:var(--body);font-weight:500;font-size:1rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:1rem;background:none;border:none;color:var(--fg);width:100%;text-align:left;padding:.5rem 0}
+.faq-q::after{content:"+";font-size:1.3rem;color:var(--accent-deep);flex-shrink:0;transition:transform .3s}
+.faq-item.open .faq-q::after{content:"−"}
+.faq-a{color:var(--fg-muted);font-size:.93rem;max-height:0;overflow:hidden;transition:max-height .35s ease,padding .35s ease;padding-top:0}
+.faq-item.open .faq-a{max-height:300px;padding-top:.5rem}
+footer{background:var(--bg-alt);padding-block:2.5rem;text-align:center;font-size:.85rem;color:var(--fg-muted)}
+footer a{color:var(--accent-deep);text-decoration:none}
+footer a:hover{text-decoration:underline}
+.footer-dev{margin-top:1rem;padding-top:1rem;border-top:1px solid var(--warm-light);font-size:.8rem}
+.divider{width:50px;height:2px;background:var(--accent);margin:0 auto 1.5rem;border-radius:2px}
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="wrap">
+    <p class="hero-eyebrow">Bodas en Costa Rica</p>
+    <h1>Hacemos realidad la <em>boda de tus sueños</em></h1>
+    <p class="hero-sub">Fotografía profesional, invitaciones digitales, diseño de invitaciones, save the date y planificación integral de bodas en Costa Rica. Todo lo que necesitás para el día más importante de tu vida.</p>
+    <a class="hero-cta" href="https://wa.me/50688136713?text=Hola%2C%20vengo%20desde%20bodas%20de%20costa%20rica%20y%20me%20gustar%C3%ADa%20m%C3%A1s%20informaci%C3%B3n" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Contáctanos por WhatsApp
+    </a>
+  </div>
+</section>
+
+<section class="intro">
+  <div class="wrap">
+    <div class="intro-grid">
+      <div class="intro-img">
+        <span class="intro-img-placeholder">✦</span>
+      </div>
+      <div class="intro-text">
+        <h2>Expertos en planificación de bodas en Costa Rica</h2>
+        <p>Somos un equipo especializado en la <strong>organización de bodas</strong> y <strong>wedding planning en Costa Rica</strong>. Desde la primera consulta hasta el último brindis, nos encargamos de cada detalle para que vos y tu pareja vivan una experiencia inolvidable.</p>
+        <p>Ofrecemos un servicio integral que incluye <strong>fotografía de bodas</strong> profesional, <strong>invitaciones digitales</strong> personalizadas con confirmación de asistencia en línea, <strong>diseño de invitaciones</strong> impresas, <strong>save the date</strong> digitales y coordinación completa del evento.</p>
+        <p>Cada boda es única, y nuestro compromiso es crear una celebración que refleje la historia de amor de cada pareja.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="services" id="servicios">
+  <div class="wrap">
+    <p class="section-label">Nuestros servicios</p>
+    <h2 class="section-title">Todo para tu boda, en un solo lugar</h2>
+    <div class="services-grid">
+      <div class="service-card">
+        <div class="service-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg></div>
+        <h3>Wedding Planning</h3>
+        <p>Planificación y coordinación integral de bodas en Costa Rica. Nos encargamos de la logística, proveedores, cronograma del día y cada detalle para que tu boda sea perfecta.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-icon"><svg viewBox="0 0 24 24"><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg></div>
+        <h3>Fotografía de Bodas</h3>
+        <p>Capturamos los momentos más especiales de tu boda con fotografía profesional. Desde la preparación hasta la fiesta, cada instante queda inmortalizado.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-icon"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></div>
+        <h3>Invitaciones Digitales</h3>
+        <p>Invitaciones de boda digitales con diseño personalizado, sistema de RSVP online y confirmación de asistencia integrada. Tus invitados confirman desde su celular.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-icon"><svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></div>
+        <h3>Diseño de Invitaciones</h3>
+        <p>Diseño artístico de invitaciones impresas y digitales para tu boda. Creamos invitaciones únicas con acuarelas, caligrafía y detalles botánicos.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-icon"><svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM9 10H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/></svg></div>
+        <h3>Save the Date</h3>
+        <p>Anunciá la fecha de tu boda con save the date digitales elegantes. Enviamos la notificación a tus invitados por WhatsApp o correo electrónico.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="why">
+  <div class="wrap">
+    <p class="section-label">¿Por qué elegirnos?</p>
+    <h2 class="section-title">Experiencia y dedicación en cada boda</h2>
+    <div class="why-grid">
+      <div class="why-item"><div class="why-num">100%</div><h4>Personalizado</h4><p>Cada boda es única. Adaptamos nuestros servicios a tu visión y presupuesto.</p></div>
+      <div class="why-item"><div class="why-num">RSVP</div><h4>Confirmación Digital</h4><p>Sistema de confirmación de asistencia online desde cualquier dispositivo.</p></div>
+      <div class="why-item"><div class="why-num">24/7</div><h4>Soporte Dedicado</h4><p>Acompañamiento constante durante toda la planificación de tu boda.</p></div>
+      <div class="why-item"><div class="why-num">CR</div><h4>Locales</h4><p>Conocemos los mejores salones, catering y proveedores de bodas en Costa Rica.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="process">
+  <div class="wrap">
+    <p class="section-label">Cómo trabajamos</p>
+    <h2 class="section-title">De la idea al altar</h2>
+    <div class="steps">
+      <div class="step"><span class="step-num">1</span><h4>Consulta inicial</h4><p>Conversamos sobre tu visión, presupuesto y estilo.</p></div>
+      <div class="step"><span class="step-num">2</span><h4>Diseño y planificación</h4><p>Creamos el concepto visual: invitaciones, save the date y sitio web.</p></div>
+      <div class="step"><span class="step-num">3</span><h4>Invitaciones y RSVP</h4><p>Enviamos las invitaciones digitales con confirmación de asistencia online.</p></div>
+      <div class="step"><span class="step-num">4</span><h4>El gran día</h4><p>Coordinamos cada detalle y capturamos los mejores momentos.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="portfolio" id="portafolio">
+  <div class="wrap">
+    <p class="section-label">Nuestro portafolio</p>
+    <h2 class="section-title">Bodas que hemos creado</h2>
+    <div class="portfolio-grid">
+      <a class="portfolio-card" href="https://randyymelissa.bodas-costarica.com/" target="_blank" rel="noopener">
+        <div class="portfolio-thumb">
+          <div class="portfolio-thumb-inner">
+            <div class="portfolio-thumb-names">Randy &amp; Melissa</div>
+            <div class="portfolio-thumb-date">13 · Diciembre · 2026</div>
+          </div>
+          <span class="portfolio-thumb-badge">Invitación digital</span>
+        </div>
+        <div class="portfolio-info">
+          <h3>Boda Randy &amp; Melissa</h3>
+          <p>Invitación digital con RSVP online, confirmación de asistencia por WhatsApp, galería de fotos y sitio web de boda personalizado. Sala de Eventos La Alborada, San Isidro de Heredia.</p>
+          <span class="portfolio-link">Ver invitación</span>
+        </div>
+      </a>
+      <div class="portfolio-coming">
+        <h3>Tu boda aquí</h3>
+        <p>Contactanos y tu boda será la siguiente en nuestro portafolio</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="seo-content">
+  <div class="wrap">
+    <div class="seo-cols">
+      <div>
+        <h2>Bodas en Costa Rica: el destino perfecto</h2>
+        <p>Costa Rica se ha convertido en uno de los destinos más buscados para celebrar bodas, tanto para parejas locales como para bodas de destino. Con su naturaleza exuberante, playas paradisíacas y salones de eventos de primer nivel, el país ofrece el escenario ideal para una boda inolvidable.</p>
+        <p>Como wedding planners en Costa Rica, conocemos los mejores lugares para bodas en San José, Heredia, Alajuela, Guanacaste, Puntarenas y todo el territorio nacional.</p>
+      </div>
+      <div>
+        <h2>Invitaciones digitales y sitio web de boda</h2>
+        <p>Las invitaciones digitales para bodas son la tendencia en la organización de eventos. Ofrecemos diseño de invitaciones de boda personalizadas con sistema de RSVP integrado, confirmación de asistencia por WhatsApp y un sitio web exclusivo para tu boda.</p>
+        <p>Nuestro servicio de save the date digital permite anunciar la fecha de tu boda de manera elegante y moderna.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="faq" id="faq">
+  <div class="wrap">
+    <p class="section-label">Preguntas frecuentes</p>
+    <h2 class="section-title">Lo que necesitás saber</h2>
+    <div class="faq-list">
+      <div class="faq-item"><button class="faq-q">¿Qué incluye el servicio de invitaciones digitales?</button><div class="faq-a"><p>Diseño personalizado, sitio web de boda exclusivo, sistema de RSVP online, envío por WhatsApp y correo electrónico, y panel de administración para controlar respuestas en tiempo real.</p></div></div>
+      <div class="faq-item"><button class="faq-q">¿En qué zonas de Costa Rica trabajan?</button><div class="faq-a"><p>En todo Costa Rica: Gran Área Metropolitana (San José, Heredia, Alajuela, Cartago), playas de Guanacaste, Manuel Antonio, Monteverde y cualquier destino dentro del país.</p></div></div>
+      <div class="faq-item"><button class="faq-q">¿Cuánto tiempo antes debo contratar el servicio?</button><div class="faq-a"><p>Recomendamos al menos 6 meses antes para planificación integral, y 3 meses antes para invitaciones digitales y save the date. Para fotografía, al menos 4 meses de anticipación.</p></div></div>
+      <div class="faq-item"><button class="faq-q">¿Cómo funciona la confirmación de asistencia?</button><div class="faq-a"><p>Cada grupo de invitados recibe un enlace personal. Desde ahí confirman su asistencia con un formulario RSVP online. Vos controlás todo desde un panel de administración privado.</p></div></div>
+      <div class="faq-item"><button class="faq-q">¿Puedo personalizar el diseño de mi invitación?</button><div class="faq-a"><p>Absolutamente. Todas nuestras invitaciones son diseñadas a medida, con la paleta de colores, tipografía y estilo que refleje la personalidad de tu boda.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="wrap">
+    <div class="divider"></div>
+    <h2>¿Listas para empezar a planear tu boda?</h2>
+    <p>Escribinos por WhatsApp y conversemos sobre la boda que siempre soñaste. Presupuesto sin compromiso.</p>
+    <a class="cta-whatsapp" href="https://wa.me/50688136713?text=Hola%2C%20vengo%20desde%20bodas%20de%20costa%20rica%20y%20me%20gustar%C3%ADa%20m%C3%A1s%20informaci%C3%B3n" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Escribinos al 8813-6713
+    </a>
+    <span class="cta-phone">WhatsApp: 8813-6713</span>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>Bodas Costa Rica — Fotografía · Invitaciones Digitales · Diseño · Save the Date · Wedding Planning</p>
+    <p>San José, Costa Rica · WhatsApp: 8813-6713</p>
+    <div class="footer-dev">Desarrollado por <a href="https://www.linkedin.com/in/rodneyespinoza" target="_blank" rel="noopener">Rodney Espinoza</a> · Tel: 8311-8326</div>
+  </div>
+</footer>
+
+<script>
+document.querySelectorAll('.faq-q').forEach(function(btn){btn.addEventListener('click',function(){var item=btn.closest('.faq-item'),wasOpen=item.classList.contains('open');document.querySelectorAll('.faq-item.open').forEach(function(i){i.classList.remove('open')});if(!wasOpen)item.classList.add('open')})});
+</script>
+</body>
+</html>
